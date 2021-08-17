@@ -1,0 +1,242 @@
+
+
+
+
+Internet Engineering Task Force (IETF)                         V. Rabeau
+Request for Comments: 69                                       T. Gozard
+Category: Standards Track                                          G. Ye
+ISSN: 2070-1721                                                  Epitech
+                                                             20 May 2021
+
+
+                         My Teams RFC Protocol
+
+Abstract
+
+   First RFC protocol
+
+Status of This Memo
+
+   This is an Internet Standards Track document.
+
+   This document is a product of the Internet Engineering Task Force
+   (IETF).  It represents the consensus of the IETF community.  It has
+   received public review and has been approved for publication by the
+   Internet Engineering Steering Group (IESG).  Further information on
+   Internet Standards is available in Section 2 of RFC 7841.
+
+   Information about the current status of this document, any errata,
+   and how to provide feedback on it may be obtained at
+   https://www.rfc-editor.org/info/rfc69.
+
+Copyright Notice
+
+   Copyright (c) 2021 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents
+   (https://trustee.ietf.org/license-info) in effect on the date of
+   publication of this document.  Please review these documents
+   carefully, as they describe your rights and restrictions with respect
+   to this document.  Code Components extracted from this document must
+   include Simplified BSD License text as described in Section 4.e of
+   the Trust Legal Provisions and are provided without warranty as
+   described in the Simplified BSD License.
+
+Table of Contents
+
+   1.  Introduction
+   2.  My Teams protocol
+     2.1.  How work our Teams ?
+   3.  My Teams server return code
+   4.  My teams client commands
+   Authors' Addresses
+
+1.  Introduction
+
+   Second project of Network module during second year at Epitech Paris.
+   Date: 03 / 05 / 2021, 08:00 ---> 06 / 06 / 2021, 23:42
+
+   The goal of this project is to create a server and a CLI client.  The
+   network communication will be achieved through the use of TCP
+   sockets.
+
+   A collaborative communication application is a service able to manage
+   severall communication teams, where discussion are organised like
+   following: • (U+2022) threads (initial post and additional comments)
+   in a specific channel • (U+2022) discussion (personnal messages)
+
+   Here are the features we implemented: • (U+2022) Creating/Joining/
+   Leaving a team • (U+2022) Creating a user • (U+2022) Creating a
+   channel in a team • (U+2022) Creating a thread in a channel •
+   (U+2022) Creating a comment in a thread • (U+2022) Saving & restoring
+   users, teams, channels, threads & associated comments • (U+2022)
+   Personnal discussion (from a user to an other) • (U+2022) Saving &
+   restoring personnal discussion
+
+   Please note that all arguments of the existing commands should be
+   quoted with double quotes.  A missing quote should be interpreted as
+   an error.  Please note that all the names, descriptions and message
+   bodies have a pre-defined length which will be as follow: • (U+2022)
+   MAX_NAME_LENGTH 32 • (U+2022) MAX_DESCRIPTION_LENGTH 255 • (U+2022)
+   MAX_BODY_LENGTH 512
+
+2.  My Teams protocol
+
+   Request protocol : TCP
+
+   Why TCP and not UDP ? For sure TCP is slower than UDP but we always
+   want package to arrive to destination and we don't want to have
+   packet loss.  But in a case of voice package we can use UDP protocol
+   because we want fast transfer and packet loss is not a problem.
+
+   We use binary protocol (in bits) to send struct.
+
+2.1.  How work our Teams ?
+
+   1.  Client send a struct to server
+
+   2.  Server receives a command and execute it
+
+   3.  Server send in return a header with data struct size then data
+       struct
+
+   4.  Client can receives one or multiple struct
+
+   5.  Client call function to print info in terminal
+
+3.  My Teams server return code
+
+   +======+=============+=======+==============+========+==============+
+   |First |Explanation  |Second | Explanation  | Third  |Explanation   |
+   |number|             |number |              | number |              |
+   +======+=============+=======+==============+========+==============+
+   |[1]   |No error     |[0]    | Log          | [0] /  |Login / Logout|
+   |      |             |       |              | [1]    |              |
+   +------+-------------+-------+--------------+--------+--------------+
+   |[2]   |Acess denied |[1]    | Messages     | [0] /  |Send / Message|
+   |      |             |       |              | [1]    |              |
+   +------+-------------+-------+--------------+--------+--------------+
+   |[3]   |Invalid      |[2]    | Subscription | [0] /  |Subscribe /   |
+   |      |command      |       |              | [1] /  |Subscribed    |
+   |      |             |       |              | [2]    |/Unsubscribe  |
+   +------+-------------+-------+--------------+--------+--------------+
+   |[4]   |Argument     |[3]    | Informations | [0] /  |Use / Info /  |
+   |      |error        |       |              | [1] /  |List / User / |
+   |      |             |       |              | [2] /  |Users /Help   |
+   |      |             |       |              | [3] /  |              |
+   |      |             |       |              | [4] /  |              |
+   |      |             |       |              | [5]    |              |
+   +------+-------------+-------+--------------+--------+--------------+
+   |[5]   |Uuid not     |[4]    | Creation     | [0]    |Create        |
+   |      |found        |       |              |        |              |
+   +------+-------------+-------+--------------+--------+--------------+
+
+                    Table 1: My Teams server return code
+
+4.  My teams client commands
+
+    +=========================+======================================+
+    | Commands                | Explanation                          |
+    +=========================+======================================+
+    | /help                   | show help                            |
+    +-------------------------+--------------------------------------+
+    | /login ["user_name"]    | set the user_name used by client     |
+    +-------------------------+--------------------------------------+
+    | /logout                 | disconnect the client from the       |
+    |                         | server                               |
+    +-------------------------+--------------------------------------+
+    | /users                  | get the list of all users that exist |
+    |                         | on the domain                        |
+    +-------------------------+--------------------------------------+
+    | /user ["user_uuid"]     | get information about a user         |
+    +-------------------------+--------------------------------------+
+    | /send ["user_uuid"]     | send a message to a user             |
+    | ["message_body"]        |                                      |
+    +-------------------------+--------------------------------------+
+    | /messages ["user_uuid"] | list all messages exchange with an   |
+    |                         | user                                 |
+    +-------------------------+--------------------------------------+
+    | /subscribe              | subscribe to the event of a team and |
+    | ["team_uuid"]           | its sub directories (enable          |
+    |                         | reception of all events from a team) |
+    +-------------------------+--------------------------------------+
+    | /subscribed             | list all subscribed teams or list    |
+    | ?["team_uuid"]          | all users subscribed to a team       |
+    +-------------------------+--------------------------------------+
+    | /unsubscribe            | unsubscribe from a team              |
+    | ["team_uuid"]           |                                      |
+    +-------------------------+--------------------------------------+
+    | /use ?["team_uuid"]     | use specify a context team/channel/  |
+    | ?["channel_uuid"]       | thread                               |
+    | ?["thread_uuid"]        |                                      |
+    +-------------------------+--------------------------------------+
+    | /create ["team_name"]   | when the context is not defined      |
+    | ["team_description"]    | create a new team                    |
+    +-------------------------+--------------------------------------+
+    | /create                 | when team_uuid is defined create a   |
+    | ["channel_name"]        | new channel                          |
+    | ["channel_description"] |                                      |
+    +-------------------------+--------------------------------------+
+    | /create                 | when team_uuid and channel_uuid are  |
+    | ["thread_title"]        | defined create a new thread          |
+    | ["thread_message"]      |                                      |
+    +-------------------------+--------------------------------------+
+    | /create                 | when team_uuid, channel_uuid and     |
+    | ["comment_body"]        | thread_uuid are defined create a new |
+    |                         | reply                                |
+    +-------------------------+--------------------------------------+
+    | /list                   | when the context is not defined list |
+    |                         | all existing teams                   |
+    +-------------------------+--------------------------------------+
+    | /list                   | when team_uuid is definedlist all    |
+    |                         | existing channels                    |
+    +-------------------------+--------------------------------------+
+    | /list                   | when team_uuid and channel_uuid are  |
+    |                         | defined list all existing threads    |
+    +-------------------------+--------------------------------------+
+    | /list                   | when team_uuid, channel_uuid and     |
+    |                         | thread_uuid are defined list all     |
+    |                         | existing replies                     |
+    +-------------------------+--------------------------------------+
+    | /info                   | when the context is not defined      |
+    |                         | display currently logged user infos  |
+    +-------------------------+--------------------------------------+
+    | /info                   | when team_uuid is defined display    |
+    |                         | currently selected team infos        |
+    +-------------------------+--------------------------------------+
+    | /info                   | when team_uuid and channel_uuid are  |
+    |                         | defined display currently selected   |
+    |                         | channel infos                        |
+    +-------------------------+--------------------------------------+
+    | /info                   | when team_uuid, channel_uuid and     |
+    |                         | thread_uuid are defined display      |
+    |                         | currently selected thread infos      |
+    +-------------------------+--------------------------------------+
+
+                                 Table 2
+
+   Table: My teams client commands
+
+Authors' Addresses
+
+   Victoire Rabeau
+   Epitech
+   Paris
+
+   Email: victoire.rabeau@epitech.eu
+
+
+   Théodore Gozard
+   Epitech
+   Paris
+
+   Email: theodore1.gozard@epitech.eu
+
+
+   Guillaume Ye
+   Epitech
+   Paris
+
+   Email: guillaume.ye@epitech.eu
